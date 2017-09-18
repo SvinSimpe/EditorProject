@@ -14,17 +14,18 @@ Renderer::Renderer( HWND windowHandle )
 	mIsMaximized = false;
 	mIsResizing = false;
 
-	if( !CreateDeviceAndSwapChain() )
+	if( FAILED( CreateDeviceAndSwapChain() ) )
 		OutputDebugStringA( "\nerror: Unable to create ID3D11Device\n" );
 
-	if( !CreateRenderTargetView() )
+	if( FAILED( CreateRenderTargetView() ) )
 		OutputDebugStringA( "\nerror: Unable to create ID3D11RenderTargetView\n" );
 	
-	if( !CreateDepthStencilView() )
+	if( FAILED( CreateDepthStencilView() ) )
 		OutputDebugStringA( "\nerror: Unable to create ID3D11DepthStencilView\n" );
 	
-	if( !CreateRasterizerState() )
+	if( FAILED( CreateRasterizerState() ) )
 		OutputDebugStringA( "\nerror: Unable to create ID3D11RasterizerState\n" );
+
 }
 
 Renderer::~Renderer()
@@ -40,8 +41,8 @@ HRESULT Renderer::CreateDeviceAndSwapChain()
 	int height	= rc.bottom - rc.top - border;
 
 	D3D_DRIVER_TYPE driverTypes[] = { D3D_DRIVER_TYPE_HARDWARE,
-		D3D_DRIVER_TYPE_WARP,
-		D3D_DRIVER_TYPE_REFERENCE };
+									  D3D_DRIVER_TYPE_WARP,
+									  D3D_DRIVER_TYPE_REFERENCE };
 
 	DXGI_SWAP_CHAIN_DESC sd;
 	memset( &sd, 0, sizeof( sd ) );
@@ -104,7 +105,7 @@ HRESULT Renderer::CreateRenderTargetView()
 
 HRESULT Renderer::CreateDepthStencilView()
 {
-	HRESULT hr = E_FAIL;
+	HRESULT hr = S_OK;
 
 	ComPtr<ID3D11Texture2D> depthStencil = nullptr;
 
