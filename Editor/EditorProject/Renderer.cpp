@@ -1,11 +1,16 @@
 ﻿#include "Renderer.h"
 #include "Resolution.h"
+#include <DirectXColors.h>
 
 void Renderer::Update( float deltaTime )
 {}
 
 void Renderer::Render()
-{}
+{
+	BeginFrame();
+
+	EndFrame();
+}
 
 Renderer::Renderer( HWND windowHandle )
 {
@@ -30,6 +35,20 @@ Renderer::Renderer( HWND windowHandle )
 
 Renderer::~Renderer()
 {}
+
+void Renderer::BeginFrame()
+{
+	SetViewport();
+	mDeviceContext->ClearDepthStencilView( mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0 );
+	mDeviceContext->ClearRenderTargetView( mRenderTargetView.Get(), DirectX::Colors::DarkSeaGreen );
+	mDeviceContext->OMSetRenderTargets( 1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get() );
+}
+
+void Renderer::EndFrame()
+{
+	mSwapChain->Present( 1, 0 );
+	mDeviceContext->ClearState();
+}
 
 HRESULT Renderer::CreateDeviceAndSwapChain()
 {
@@ -146,5 +165,25 @@ HRESULT Renderer::CreateRasterizerState()
 	desc.DepthClipEnable	= true;
 
 	return mDevice->CreateRasterizerState( &desc, mRasterizerState.GetAddressOf() );
+}
+
+void Renderer::SetViewport()
+{
+	RECT rc;
+	GetClientRect( mWindowHandle, &rc );
+
+	int width	= ( rc.right - rc.left );
+	int height	= ( rc.bottom - rc.top );
+
+	D3D11_VIEWPORT vp;
+	vp.Width	= Resolution::WIDTH;
+	vp.Height	= Resolution::HEIGHT;
+	vp.MinDepth	= 0.0f;
+	vp.MaxDepth	= 1.0f;
+	vp.TopLeftX	= 0;
+	vp.TopLeftY	= 0;
+
+	mDeviceContext->RSSetViewports( 1, &vp );
+	mDeviceContext->OMSetRenderTargets( 1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get() );
 }
 

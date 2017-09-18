@@ -17,10 +17,14 @@ class Renderer : public IGameObject
 		~Renderer();
 
 	private:
+		void BeginFrame();
+		void EndFrame();
+
 		HRESULT CreateDeviceAndSwapChain();
 		HRESULT CreateRenderTargetView();
 		HRESULT CreateDepthStencilView();
 		HRESULT CreateRasterizerState();
+		void SetViewport();
 	
 	private:
 		HWND mWindowHandle;
