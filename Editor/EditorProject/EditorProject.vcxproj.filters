@@ -54,6 +54,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include=".editorconfig" />
+    <None Include=".editorconfig">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

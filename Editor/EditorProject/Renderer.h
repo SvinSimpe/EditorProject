@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "stdafx.h"
 #include <wrl.h>
 #include "IGameObject.h"
@@ -23,9 +23,15 @@ class Renderer : public IGameObject
 	
 	private:
 		HWND mWindowHandle;
+		bool mIsMinimized;
+		bool mIsMaximized;
+		bool mIsResizing;
+
 		ComPtr<ID3D11Device> mDevice;
 		ComPtr<ID3D11DeviceContext> mDeviceContext;
 		ComPtr<IDXGISwapChain> mSwapChain;
-
+		ComPtr<ID3D11RenderTargetView> mRenderTargetView;
+		ComPtr<ID3D11DepthStencilView> mDepthStencilView;
+		ComPtr<D3D11_VIEWPORT> mViewPort;
 
 };
