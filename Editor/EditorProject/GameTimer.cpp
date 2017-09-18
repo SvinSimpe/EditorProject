@@ -84,17 +84,13 @@ void GameTimer::Tick()
 }
 
 GameTimer::GameTimer()
+	: mSecondsPerCount(0), mDeltaTime(0), mBaseTime(0), mPausedTime(0), mStopTime(0),
+	mPreviousTimeStamp(0), mCurrentTimeStamp(0), mIsStopped(false)
 {
-	mSecondsPerCount = 0.0;
-	mDeltaTime = 0.0;
+	__int64 countsPerSec;
+	QueryPerformanceFrequency( (LARGE_INTEGER*)&countsPerSec );
 
-	mBaseTime = 0;
-	mPausedTime = 0;
-	mStopTime = 0;
-	mPreviousTimeStamp = 0;
-	mCurrentTimeStamp = 0;
-
-	mIsStopped = true;
+	mSecondsPerCount = 1.0 / static_cast<double>( countsPerSec );
 }
 
 GameTimer::~GameTimer()
