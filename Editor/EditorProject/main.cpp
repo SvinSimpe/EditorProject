@@ -19,8 +19,12 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 	Engine* gameEngine = new Engine();
 
-	if( gameEngine->Initialize( hInstance ) )
+	if( !gameEngine->Initialize( hInstance ) )
 		return 0;
+	else
+		gameEngine->Run();
 
-	return gameEngine->Run();
+	delete gameEngine;
+
+	return 0;
 }
