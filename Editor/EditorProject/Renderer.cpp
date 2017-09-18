@@ -1,4 +1,5 @@
-#include "Renderer.h"
+﻿#include "Renderer.h"
+#include "Resolution.h"
 
 void Renderer::Update( float deltaTime )
 {}

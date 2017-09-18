@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "GameTimer.h"
 #include "Renderer.h"
+#include "Resolution.h"
 
 Engine* gEngine = 0;
 
