@@ -16,6 +16,7 @@ class Engine
 
 	private:
 		bool InitializeModules();
+		void SetWindowTitleBar( const float deltaTime );
 	private:
 		HINSTANCE		mHInstance;
 		HWND			mHWnd;

@@ -3,6 +3,10 @@
 #include "Renderer.h"
 #include "Resolution.h"
 
+#include <string>
+#include <sstream>
+
+
 Engine* gEngine = 0;
 
 LRESULT CALLBACK MainWndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
@@ -55,11 +59,13 @@ int Engine::Run()
 		{
 			gameTimer.Tick();
 			// Update Engine modules
-			//mRenderer->Update( gameTimer.DeltaTime() );
-			//mRenderer->Render();
+			mRenderer->Update( gameTimer.DeltaTime() );
+			mRenderer->Render();
+
+			SetWindowTitleBar( gameTimer.DeltaTime() );
 		}
 	}
-
+	
 	return static_cast<int>( msg.wParam );
 }
 
@@ -131,4 +137,19 @@ bool Engine::InitializeModules()
 		return false;
 
 	return true;
+}
+
+void Engine::SetWindowTitleBar( const float deltaTime )
+{
+	std::wstringstream wss;
+	std::wstring ws;
+
+	wss.clear();
+
+	wss << "Editor" << "             DeltaTime: " << deltaTime ;
+	ws = wss.str();
+
+	SetWindowTextW( mHWnd, ws.c_str() );
+	ws.clear();
+	wss.str(ws);
 }
