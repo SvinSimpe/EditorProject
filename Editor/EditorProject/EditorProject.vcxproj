@@ -149,6 +149,7 @@
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="IGameObject.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Resolution.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
