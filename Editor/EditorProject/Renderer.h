@@ -17,9 +17,10 @@ class Renderer : public IGameObject
 		~Renderer();
 
 	private:
-		HRESULT CreateDevice();
-		HRESULT CreateSwapChain();
-		HRESULT CreateRTV();
+		HRESULT CreateDeviceAndSwapChain();
+		HRESULT CreateRenderTargetView();
+		HRESULT CreateDepthStencilView();
+		HRESULT CreateRasterizerState();
 	
 	private:
 		HWND mWindowHandle;
@@ -32,6 +33,6 @@ class Renderer : public IGameObject
 		ComPtr<IDXGISwapChain> mSwapChain;
 		ComPtr<ID3D11RenderTargetView> mRenderTargetView;
 		ComPtr<ID3D11DepthStencilView> mDepthStencilView;
-		ComPtr<D3D11_VIEWPORT> mViewPort;
-
+		ComPtr<ID3D11RasterizerState> mRasterizerState;
+		D3D11_VIEWPORT mViewPort;
 };
