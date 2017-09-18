@@ -2,12 +2,6 @@
 
 #include <Windows.h>
 
-namespace Resolution
-{
-	constexpr unsigned int Screen_Width = 1024;
-	constexpr unsigned int Screen_Height = 768;
-}
-
 class Engine
 {
 	public:
