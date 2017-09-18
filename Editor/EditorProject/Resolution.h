@@ -2,6 +2,6 @@
 
 namespace Resolution
 {
-	constexpr unsigned int Screen_Width = 1024;
-	constexpr unsigned int Screen_Height = 768;
+	constexpr unsigned int WIDTH = 1024;
+	constexpr unsigned int HEIGHT = 768;
 }

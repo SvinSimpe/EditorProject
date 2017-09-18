@@ -93,7 +93,7 @@ bool Engine::Initialize( HINSTANCE hInstance )
 
 
 	// Adjust & Create Window
-	RECT rc = { 0, 0, Resolution::Screen_Width, Resolution::Screen_Height };
+	RECT rc = { 0, 0, Resolution::WIDTH, Resolution::HEIGHT };
 	AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
 
 	if( !( mHWnd = CreateWindowA( "Editor",
