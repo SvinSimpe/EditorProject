@@ -55,8 +55,8 @@ int Engine::Run()
 		{
 			gameTimer.Tick();
 			// Update Engine modules
-			mRenderer->Update( gameTimer.DeltaTime() );
-			mRenderer->Render();
+			//mRenderer->Update( gameTimer.DeltaTime() );
+			//mRenderer->Render();
 		}
 	}
 
@@ -75,8 +75,8 @@ bool Engine::Initialize( HINSTANCE hInstance )
 	mHInstance = hInstance;
 
 	// Register Window Class
-	WNDCLASSEX wc;
-	wc.cbSize			= sizeof( WNDCLASSEX );
+	WNDCLASS wc;
+	//wc.cbSize			= sizeof( WNDCLASS );
 	wc.style			= CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc		= MainWndProc;
 	wc.cbClsExtra		= 0;
@@ -86,10 +86,10 @@ bool Engine::Initialize( HINSTANCE hInstance )
 	wc.hCursor			= LoadCursor( NULL, IDC_HAND );
 	wc.hbrBackground	= (HBRUSH)( COLOR_WINDOW + 1 );
 	wc.lpszMenuName		= NULL;
-	wc.lpszClassName	= (LPCWSTR)"Editor";
-	wc.hIconSm			= 0;
+	wc.lpszClassName	= L"Editor";
+	//wc.hIconSm			= 0;
 
-	if( !RegisterClassEx( &wc ) )
+	if( !RegisterClass( &wc ) )
 		return false;
 
 
@@ -97,8 +97,8 @@ bool Engine::Initialize( HINSTANCE hInstance )
 	RECT rc = { 0, 0, Resolution::WIDTH, Resolution::HEIGHT };
 	AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
 
-	if( !( mHWnd = CreateWindowA( "Editor",
-								  "Editor",
+	if( !( mHWnd = CreateWindow( L"Editor",
+								 L"Editor",
 								  WS_OVERLAPPEDWINDOW,
 								  CW_USEDEFAULT,
 								  CW_USEDEFAULT,
@@ -126,7 +126,8 @@ Engine::~Engine()
 
 bool Engine::InitializeModules()
 {
-	if( mRenderer = new Renderer( mHWnd ) )
+	mRenderer = new Renderer( mHWnd );
+	if( !mRenderer )
 		return false;
 
 	return true;
