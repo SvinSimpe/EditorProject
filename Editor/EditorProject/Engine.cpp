@@ -53,6 +53,7 @@ int Engine::Run()
 		}
 		else
 		{
+			gameTimer.Tick();
 			// Update Engine modules
 			mRenderer->Update( gameTimer.DeltaTime() );
 			mRenderer->Render();
@@ -85,7 +86,7 @@ bool Engine::Initialize( HINSTANCE hInstance )
 	wc.hCursor			= LoadCursor( NULL, IDC_HAND );
 	wc.hbrBackground	= (HBRUSH)( COLOR_WINDOW + 1 );
 	wc.lpszMenuName		= NULL;
-	wc.lpszClassName	= L"Editor";
+	wc.lpszClassName	= (LPCWSTR)"Editor";
 	wc.hIconSm			= 0;
 
 	if( !RegisterClassEx( &wc ) )
