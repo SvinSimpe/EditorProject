@@ -44,7 +44,14 @@ class Renderer : public IGameObject
 		ComPtr<ID3D11RasterizerState> mRasterizerState;
 		D3D11_VIEWPORT mViewPort;
 
+		// Shader
 		ComPtr<ID3D11VertexShader> mVertexShader;
 		ComPtr<ID3D11PixelShader> mPixelShader;
 		ComPtr<ID3D11InputLayout> mInputLayout;
+
+		// Buffer
+		ComPtr<ID3D11Buffer> mPerFrameCBuffer;
+		ComPtr<ID3D11Buffer> mPerObjectCBuffer;
+		ComPtr<ID3D11Buffer> mVertexBuffer;
+
 };
