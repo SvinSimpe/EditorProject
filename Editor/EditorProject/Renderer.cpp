@@ -1,6 +1,7 @@
 ﻿#include "Renderer.h"
 #include "Resolution.h"
 #include <DirectXColors.h>
+#include <fstream>
 
 void Renderer::Update( float deltaTime )
 {}
@@ -12,7 +13,7 @@ void Renderer::Render()
 	EndFrame();
 }
 
-Renderer::Renderer( HWND windowHandle )
+Renderer::Renderer( HWND windowHandle ) // Use init list
 {
 	mWindowHandle = windowHandle;
 	mIsMinimized = false;
@@ -30,6 +31,8 @@ Renderer::Renderer( HWND windowHandle )
 	
 	if( FAILED( CreateRasterizerState() ) )
 		OutputDebugStringA( "\nerror: Unable to create ID3D11RasterizerState\n" );
+
+	// Add shader creation
 
 }
 
@@ -187,3 +190,96 @@ void Renderer::SetViewport()
 	mDeviceContext->OMSetRenderTargets( 1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get() );
 }
 
+HRESULT Renderer::CreateShaders()
+{
+	ComPtr<ID3DBlob> vs = nullptr;
+	if ( CompileShader( "Shader.hlsl", "VertexShaderMain", "vs_5_0", nullptr, vs.GetAddressOf() ) )
+	{
+		HRESULT hr = S_OK;
+		if( SUCCEEDED( hr = mDevice->CreateVertexShader( vs->GetBufferPointer(),
+														 vs->GetBufferSize(),
+														 nullptr,
+														 effect.vertexShader.GetAddressOf() ) ) )
+		{	
+			if( effect.inputType == EInputType::Instanced )
+			{ 
+				hr = mDevice->CreateInputLayout( InputDesc::Instanced,
+												 ARRAYSIZE( InputDesc::Instanced ),
+												 vs->GetBufferPointer(),
+												 vs->GetBufferSize(),
+												 effect.inputLayout.GetAddressOf() );
+			}
+			else if( effect.inputType == EInputType::Debug )
+			{ 
+				hr = mDevice->CreateInputLayout( InputDesc::Debug,
+												 ARRAYSIZE( InputDesc::Debug ),
+												 vs->GetBufferPointer(),
+												 vs->GetBufferSize(),
+												 effect.inputLayout.GetAddressOf() );
+
+			}
+		}
+
+		ComPtr<ID3DBlob> ps = nullptr;
+
+		if( CompileShader( effect.shaderFile, "PixelShaderMain", "ps_5_0", nullptr, ps.GetAddressOf() ) )
+		{
+			hr = mDevice->CreatePixelShader( ps->GetBufferPointer(),
+											 ps->GetBufferSize(),
+											 nullptr,
+											 effect.pixelShader.GetAddressOf() );
+
+		}	
+		else if( hr == E_FAIL )
+			return false;
+	}
+
+	return true;
+
+	return S_OK;
+}
+
+HRESULT Renderer::CompileShader( char* shaderFile, char* pEntrypoint, char* pTarget,
+								 D3D10_SHADER_MACRO* pDefines, ID3DBlob** pCompiledShader )
+{
+	// Full optimization level
+	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3;
+
+	#if defined(DEBUG) || defined(_DEBUG)
+		dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS | 
+						D3DCOMPILE_IEEE_STRICTNESS |
+						D3DCOMPILE_DEBUG | 
+						D3DCOMPILE_WARNINGS_ARE_ERRORS;
+	#endif
+
+
+	std::string shader_code;
+	std::ifstream in( shaderFile, std::ios::in | std::ios::binary );
+
+	if( in )
+	{
+		in.seekg( 0, std::ios::end );
+		shader_code.resize( static_cast<unsigned int>( in.tellg() ) );
+		in.seekg( 0, std::ios::beg );
+		in.read( &shader_code[0], shader_code.size() );
+		in.close();
+	}
+
+	ComPtr<ID3DBlob> errorBlob = nullptr;
+	HRESULT hr = D3DCompile( shader_code.data(),
+							 shader_code.size(),
+							 NULL,
+							 pDefines,
+							 nullptr,
+							 pEntrypoint,
+							 pTarget,
+							 dwShaderFlags,
+							 NULL,
+							 pCompiledShader,
+							 &errorBlob );
+
+	if( errorBlob )
+		OutputDebugStringA( (char*)errorBlob->GetBufferPointer() );
+
+	return hr;
+}
