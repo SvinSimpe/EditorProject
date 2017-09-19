@@ -2,9 +2,22 @@
 #include "Resolution.h"
 #include <DirectXColors.h>
 #include <fstream>
+#include "Globals.h"
+
+struct Vertex32
+{
+	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT3 normal;
+	DirectX::XMFLOAT2 texCoord;
+};
+
+
+
 
 void Renderer::Update( float deltaTime )
-{}
+{
+	// Update buffers
+}
 
 void Renderer::Render()
 {
@@ -188,6 +201,57 @@ void Renderer::SetViewport()
 
 	mDeviceContext->RSSetViewports( 1, &vp );
 	mDeviceContext->OMSetRenderTargets( 1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get() );
+}
+
+HRESULT Renderer::CreateFrameBuffer()
+{
+	struct FrameData
+	{
+		DirectX::XMFLOAT4X4 view;
+		DirectX::XMFLOAT4X4 projection;
+	};
+
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth			= sizeof( FrameData );
+	cbDesc.Usage				= D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags			= D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags		= D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags			= 0;
+	cbDesc.StructureByteStride	= 0;
+
+	return mDevice->CreateBuffer( &cbDesc, nullptr, mFrameCBuffer.GetAddressOf() );
+}
+
+HRESULT Renderer::CreateObjectBuffer()
+{
+	D3D11_BUFFER_DESC ibDesc;
+	ibDesc.ByteWidth			= sizeof( DirectX::XMFLOAT4X4 ) * Globals::MAX_ACTORS;
+	ibDesc.Usage				= D3D11_USAGE_DYNAMIC;
+	ibDesc.BindFlags			= D3D11_BIND_VERTEX_BUFFER;
+	ibDesc.CPUAccessFlags		= D3D11_CPU_ACCESS_WRITE;
+	ibDesc.MiscFlags			= 0;
+	ibDesc.StructureByteStride	= 0;
+
+	return mDevice->CreateBuffer( &ibDesc, nullptr, mObjectCBuffer.GetAddressOf() );
+}
+
+HRESULT Renderer::CreateVertexBuffer()
+{
+	D3D11_BUFFER_DESC vbd;
+	vbd.ByteWidth			= sizeof(Vertex32) * 32;
+	vbd.StructureByteStride = sizeof(Vertex32);
+	vbd.Usage				= D3D11_USAGE_IMMUTABLE;
+	vbd.BindFlags			= D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags		= 0;
+	vbd.MiscFlags			= 0;
+
+	//D3D11_SUBRESOURCE_DATA vinitData;
+	//vinitData.SysMemPitch		= 0;
+	//vinitData.SysMemSlicePitch	= 0;
+	//vinitData.pSysMem			= &mCubeMesh->vertices[0];
+
+	// Supply initial vertex data
+	return mDevice->CreateBuffer( &vbd, nullptr, mVertexBuffer.GetAddressOf() );
 }
 
 HRESULT Renderer::CreateShaders()

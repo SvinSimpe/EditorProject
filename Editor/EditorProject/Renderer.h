@@ -24,12 +24,16 @@ class Renderer : public IGameObject
 		HRESULT CreateRenderTargetView();
 		HRESULT CreateDepthStencilView();
 		HRESULT CreateRasterizerState();
-		void SetViewport();
-
+		void	SetViewport();
+		// Buffers
+		HRESULT CreateFrameBuffer();
+		HRESULT CreateObjectBuffer();
+		HRESULT CreateVertexBuffer();
+		// Shaders
 		HRESULT CreateShaders();
 		HRESULT CompileShader( char* shaderFile, char* pEntrypoint, char* pTarget,
 							   D3D10_SHADER_MACRO* pDefines, ID3DBlob** pCompiledShader );
-	
+
 	private:
 		HWND mWindowHandle;
 		bool mIsMinimized;
@@ -44,14 +48,14 @@ class Renderer : public IGameObject
 		ComPtr<ID3D11RasterizerState> mRasterizerState;
 		D3D11_VIEWPORT mViewPort;
 
+		// Buffer
+		ComPtr<ID3D11Buffer> mFrameCBuffer;
+		ComPtr<ID3D11Buffer> mObjectCBuffer;
+		ComPtr<ID3D11Buffer> mVertexBuffer;
+
 		// Shader
 		ComPtr<ID3D11VertexShader> mVertexShader;
 		ComPtr<ID3D11PixelShader> mPixelShader;
 		ComPtr<ID3D11InputLayout> mInputLayout;
-
-		// Buffer
-		ComPtr<ID3D11Buffer> mPerFrameCBuffer;
-		ComPtr<ID3D11Buffer> mPerObjectCBuffer;
-		ComPtr<ID3D11Buffer> mVertexBuffer;
 
 };
