@@ -193,50 +193,38 @@ void Renderer::SetViewport()
 HRESULT Renderer::CreateShaders()
 {
 	ComPtr<ID3DBlob> vs = nullptr;
-	if ( CompileShader( "Shader.hlsl", "VertexShaderMain", "vs_5_0", nullptr, vs.GetAddressOf() ) )
+	HRESULT hr = S_OK;
+	if ( CompileShader( "Shader.hlsl", "main", "vs_5_0", nullptr, vs.GetAddressOf() ) )
 	{
-		HRESULT hr = S_OK;
+		
 		if( SUCCEEDED( hr = mDevice->CreateVertexShader( vs->GetBufferPointer(),
 														 vs->GetBufferSize(),
 														 nullptr,
-														 effect.vertexShader.GetAddressOf() ) ) )
+														 mVertexShader.GetAddressOf() ) ) )
 		{	
-			if( effect.inputType == EInputType::Instanced )
-			{ 
-				hr = mDevice->CreateInputLayout( InputDesc::Instanced,
-												 ARRAYSIZE( InputDesc::Instanced ),
-												 vs->GetBufferPointer(),
-												 vs->GetBufferSize(),
-												 effect.inputLayout.GetAddressOf() );
-			}
-			else if( effect.inputType == EInputType::Debug )
-			{ 
-				hr = mDevice->CreateInputLayout( InputDesc::Debug,
-												 ARRAYSIZE( InputDesc::Debug ),
-												 vs->GetBufferPointer(),
-												 vs->GetBufferSize(),
-												 effect.inputLayout.GetAddressOf() );
+			static D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
+				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,	0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "NORMAL",	  0, DXGI_FORMAT_R32G32B32_FLOAT,	0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,		0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 } };
 
-			}
+				hr = mDevice->CreateInputLayout( inputDesc,
+												 ARRAYSIZE( inputDesc ),
+												 vs->GetBufferPointer(),
+												 vs->GetBufferSize(),
+												 mInputLayout.GetAddressOf() );
 		}
 
 		ComPtr<ID3DBlob> ps = nullptr;
-
-		if( CompileShader( effect.shaderFile, "PixelShaderMain", "ps_5_0", nullptr, ps.GetAddressOf() ) )
+		if( CompileShader( "Shader.hlsl", "main", "ps_5_0", nullptr, ps.GetAddressOf() ) )
 		{
 			hr = mDevice->CreatePixelShader( ps->GetBufferPointer(),
 											 ps->GetBufferSize(),
 											 nullptr,
-											 effect.pixelShader.GetAddressOf() );
-
+											 mPixelShader.GetAddressOf() );
 		}	
-		else if( hr == E_FAIL )
-			return false;
 	}
 
-	return true;
-
-	return S_OK;
+	return hr;
 }
 
 HRESULT Renderer::CompileShader( char* shaderFile, char* pEntrypoint, char* pTarget,
