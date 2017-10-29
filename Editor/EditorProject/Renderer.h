@@ -12,12 +12,13 @@ class Renderer : public IGameObject
 		virtual void Update( float deltaTime ) override;
 		virtual void Render() override;
 
-
+		Renderer();
 		Renderer( HWND windowHandle );
 		~Renderer();
 
 	private:
 		void BeginFrame();
+		void Draw();
 		void EndFrame();
 
 		HRESULT CreateDeviceAndSwapChain();
@@ -57,5 +58,7 @@ class Renderer : public IGameObject
 		ComPtr<ID3D11VertexShader> mVertexShader;
 		ComPtr<ID3D11PixelShader> mPixelShader;
 		ComPtr<ID3D11InputLayout> mInputLayout;
+
+		class Camera* mCamera;
 
 };

@@ -74,11 +74,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShader.hlsl">
+    <Text Include="PixelShader.hlsl">
       <Filter>Header Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShader.hlsl">
+    </Text>
+    <Text Include="VertexShader.hlsl">
       <Filter>Header Files\Shaders</Filter>
-    </FxCompile>
+    </Text>
   </ItemGroup>
 </Project>

@@ -1,8 +1,9 @@
-﻿#include "Renderer.h"
+#include "Renderer.h"
 #include "Resolution.h"
 #include <DirectXColors.h>
 #include <fstream>
 #include "Globals.h"
+#include "Camera.h"
 
 struct Vertex32
 {
@@ -10,7 +11,6 @@ struct Vertex32
 	DirectX::XMFLOAT3 normal;
 	DirectX::XMFLOAT2 texCoord;
 };
-
 
 
 
@@ -22,17 +22,36 @@ void Renderer::Update( float deltaTime )
 void Renderer::Render()
 {
 	BeginFrame();
-
+	Draw();
 	EndFrame();
 }
 
-Renderer::Renderer( HWND windowHandle ) // Use init list
-{
-	mWindowHandle = windowHandle;
-	mIsMinimized = false;
-	mIsMaximized = false;
-	mIsResizing = false;
+Renderer::Renderer()
+	: mWindowHandle( NULL ),
+	mIsMinimized( false ),
+	mIsMaximized( false ),
+	mIsResizing( false ),
+	mDevice( nullptr ),
+	mDeviceContext( nullptr ),
+	mSwapChain( nullptr ),
+	mRenderTargetView( nullptr ),
+	mDepthStencilView( nullptr ),
+	mRasterizerState( nullptr ),
+	mViewPort(),
+	mFrameCBuffer( nullptr ),
+	mObjectCBuffer( nullptr ),
+	mVertexBuffer( nullptr ),
+	mVertexShader( nullptr ),
+	mPixelShader( nullptr ),
+	mCamera( nullptr )
+{}
 
+Renderer::Renderer( HWND windowHandle )
+	: mWindowHandle( windowHandle ),
+	mIsMinimized( false ),
+	mIsMaximized( false ),
+	mIsResizing( false )
+{
 	if( FAILED( CreateDeviceAndSwapChain() ) )
 		OutputDebugStringA( "\nerror: Unable to create ID3D11Device\n" );
 
@@ -45,8 +64,19 @@ Renderer::Renderer( HWND windowHandle ) // Use init list
 	if( FAILED( CreateRasterizerState() ) )
 		OutputDebugStringA( "\nerror: Unable to create ID3D11RasterizerState\n" );
 
-	// Add shader creation
+	if( FAILED( CreateFrameBuffer() ) )
+		OutputDebugStringA( "\nerror: Unable to create Renderer FrameBuffer\n" );
 
+	if( FAILED( CreateObjectBuffer() ) )
+		OutputDebugStringA( "\nerror: Unable to create Renderer ObjectBuffer\n" );
+
+	if( FAILED( CreateVertexBuffer() ) )
+		OutputDebugStringA( "\nerror: Unable to create Renderer VertexBuffer\n" );
+
+	if( FAILED( CreateShaders() ) )
+		OutputDebugStringA( "\nerror: Unable to create Renderer Shaders\n" );
+
+	mCamera = new Camera( { 0.0f, 0.0f, -10.f } );
 }
 
 Renderer::~Renderer()
@@ -58,6 +88,28 @@ void Renderer::BeginFrame()
 	mDeviceContext->ClearDepthStencilView( mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0 );
 	mDeviceContext->ClearRenderTargetView( mRenderTargetView.Get(), DirectX::Colors::DarkSeaGreen );
 	mDeviceContext->OMSetRenderTargets( 1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get() );
+}
+
+void Renderer::Draw()
+{
+	UINT32 stride[1]				= { sizeof(Vertex32) };
+	UINT32 offset[1]				= { 0 };
+
+	mDeviceContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf(), stride, offset );
+
+	mDeviceContext->IASetInputLayout( mInputLayout.Get() );
+	mDeviceContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+
+	mDeviceContext->VSSetShader( mVertexShader.Get(), nullptr, 0 );
+	mDeviceContext->GSSetShader( nullptr, nullptr, 0 );
+	mDeviceContext->PSSetShader( mPixelShader.Get(), nullptr, 0 );
+
+
+
+
+	// Supply with actual vertices
+	mDeviceContext->Draw( 3, 0 );
+
 }
 
 void Renderer::EndFrame()
@@ -212,7 +264,7 @@ HRESULT Renderer::CreateFrameBuffer()
 	};
 
 	D3D11_BUFFER_DESC cbDesc;
-	cbDesc.ByteWidth			= sizeof( FrameData );
+	cbDesc.ByteWidth			= sizeof(FrameData);
 	cbDesc.Usage				= D3D11_USAGE_DYNAMIC;
 	cbDesc.BindFlags			= D3D11_BIND_CONSTANT_BUFFER;
 	cbDesc.CPUAccessFlags		= D3D11_CPU_ACCESS_WRITE;
@@ -238,27 +290,35 @@ HRESULT Renderer::CreateObjectBuffer()
 HRESULT Renderer::CreateVertexBuffer()
 {
 	D3D11_BUFFER_DESC vbd;
-	vbd.ByteWidth			= sizeof(Vertex32) * 32;
+	vbd.ByteWidth			= sizeof(Vertex32) * 3;
 	vbd.StructureByteStride = sizeof(Vertex32);
-	vbd.Usage				= D3D11_USAGE_IMMUTABLE;
+	vbd.Usage				= D3D11_USAGE_DYNAMIC;
 	vbd.BindFlags			= D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags		= 0;
+	vbd.CPUAccessFlags		= D3D11_CPU_ACCESS_WRITE;
 	vbd.MiscFlags			= 0;
 
-	//D3D11_SUBRESOURCE_DATA vinitData;
-	//vinitData.SysMemPitch		= 0;
-	//vinitData.SysMemSlicePitch	= 0;
-	//vinitData.pSysMem			= &mCubeMesh->vertices[0];
+
+	// Temp triangle
+	Vertex32 vertices[3];
+	memset( &vertices, 0, sizeof(Vertex32) * 3 );
+	vertices[0].position.x = -3.0f;
+	vertices[1].position.y = 3.0f;
+	vertices[2].position.x = 3.0f;
+
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.SysMemPitch		= 0;
+	vinitData.SysMemSlicePitch	= 0;
+	vinitData.pSysMem			= &vertices[0];
 
 	// Supply initial vertex data
-	return mDevice->CreateBuffer( &vbd, nullptr, mVertexBuffer.GetAddressOf() );
+	return mDevice->CreateBuffer( &vbd, &vinitData, mVertexBuffer.GetAddressOf() );
 }
 
 HRESULT Renderer::CreateShaders()
 {
 	ComPtr<ID3DBlob> vs = nullptr;
-	HRESULT hr = S_OK;
-	if ( CompileShader( "Shader.hlsl", "main", "vs_5_0", nullptr, vs.GetAddressOf() ) )
+	HRESULT hr = E_FAIL;
+	if ( SUCCEEDED( hr = CompileShader( "VertexShader.hlsl", "main", "vs_5_0", nullptr, vs.GetAddressOf() ) ) )
 	{
 		
 		if( SUCCEEDED( hr = mDevice->CreateVertexShader( vs->GetBufferPointer(),
@@ -279,7 +339,7 @@ HRESULT Renderer::CreateShaders()
 		}
 
 		ComPtr<ID3DBlob> ps = nullptr;
-		if( CompileShader( "Shader.hlsl", "main", "ps_5_0", nullptr, ps.GetAddressOf() ) )
+		if( SUCCEEDED( hr = CompileShader( "PixelShader.hlsl", "main", "ps_5_0", nullptr, ps.GetAddressOf() ) ) )
 		{
 			hr = mDevice->CreatePixelShader( ps->GetBufferPointer(),
 											 ps->GetBufferSize(),
