@@ -5,10 +5,11 @@
 class Camera
 {
 	public:
+		// Rebuilds view matrix
 		void Update( float deltaTime );
 		void SetFocusPoint( const DirectX::XMFLOAT3& newFocusPoint = DirectX::XMFLOAT3() ) noexcept;
 		void Translate( float deltaTime, DirectX::XMFLOAT3 direction );
-		inline DirectX::XMFLOAT4X4 GetViewMatrix() const noexcept {return mViewMatrix; }
+		inline DirectX::XMFLOAT4X4 GetViewMatrix() const noexcept { return mViewMatrix; }
 		inline DirectX::XMFLOAT4X4 GetProjectionMatrix() const noexcept { return mProjectionMatrix; }
 
 		Camera();

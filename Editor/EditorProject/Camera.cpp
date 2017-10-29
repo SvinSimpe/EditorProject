@@ -78,10 +78,9 @@ Camera::Camera()
 
 Camera::Camera( const XMFLOAT3 cameraLocation, const XMFLOAT3 focusPoint,
 							const float minDrawDistance, const float maxDrawDistance, const float fieldOfView )
+	: mLocation(cameraLocation),
+	mFocusPoint(focusPoint)
 {
-	mLocation	= cameraLocation;
-	mFocusPoint		= focusPoint;
-
 	XMVECTOR look = XMLoadFloat3( &mFocusPoint ) - XMLoadFloat3( &mLocation );
 	XMStoreFloat3( &mLookVector, XMVector3Normalize( look ) );
 
